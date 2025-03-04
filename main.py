@@ -1,46 +1,27 @@
 import sqlite3
 
-# Connection
-conn = sqlite3.connect("users.db")
+# In Memory Database
+# :memory: 를 이용하여 connection을 하면 메모리에 데이터베이스를 불러와서 Redis처럼 사용할 수 있게 됨
+conn = sqlite3.connect("movies.db")
 
-# Cursor: reader 혹은 writer의 역할을 함
 cur = conn.cursor()
 
+res = cur.execute("SELECT movie_id, title FROM movies;")
 
-# Initializing and Insert
-def init_table():
-    # cur.excute()에 SQL 작성
-    cur.execute(
-        """
-    CREATE TABLE users (
-    user_id integer primary key autoincrement,
-    username text not null,
-    password text not null
-    );
-    """
-    )
-    cur.execute(
-        """
-    INSERT INTO users (username, password)
-    VALUES ('nico', 123), ('lynn', 321);
-    """
-    )
+# # Cursor는 fetch를 하면 어디까지 fetch했는지를 기억해 놓음. 위치를 기억하기 때문에 커서라고 함.
+# first_thousand = res.fetchmany(1000)  # 1000번째 row까지 fetch했음을 기억
+# next_thousand = res.fetchmany(10000)  # 11000번째 row까지 fetch했음을 기억
+# last_movies = res.fetchall()  # 11001번째 row부터 끝까지 가져옴
 
+# print(
+#     res.fetchone(),
+#     res.fetchone(),
+#     res.fetchone(),
+#     res.fetchone(),
+# )
 
-def print_all_users():
-    # res: result -> Cursor를 반환함
-    res = cur.execute("SELECT * FROM users;")
-    # 얼마나 많은 양을 fetch할 것인지 결정해줘야 함. 데이터베이스가 큰 경우에는 일부만 fetch해야 함. 메모리 공간과 시간 고려.
-    data = res.fetchall()
-    print(data)
+for movie in res:
+    print(movie)
 
-
-# init_table()
-print_all_users()
-
-# commit 없이는 transaction이 종료되지 않기 때문에 수정 사항이 반영되지 않음
-# 반드시 Commit해줘야 함
 conn.commit()
-
-# 메모리 누수나 Connection이 열려있는 상태를 방지하기 위해 반드시 닫아줘야 함
 conn.close()
