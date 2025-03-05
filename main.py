@@ -8,12 +8,13 @@ database = client.get_database("movies")
 # Collection 연결
 movies = database.get_collection("movies")
 
-# query = {"director": "Christopher Nolan"}
-query = {"rating": {"$gte": 8}}
+new_movie = {
+    "title": "New movie",
+    "director": "Al pachino",
+}
 
-results = movies.find(query)
+result = movies.insert_one(new_movie)
 
-# mongosh에서는 fetchall, fetchone 등을 사용하지만 python에서는 이러한 것들 사용이 불가능
+print(result)
 
-for movie in results:
-    print(movie)
+client.close()
