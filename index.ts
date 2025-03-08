@@ -1,24 +1,29 @@
 import { Database } from "bun:sqlite";
 import { drizzle } from "drizzle-orm/bun-sqlite";
-import { movies } from "./drizzle/schema";
+import { comments, users } from "./schema";
+import { eq } from "drizzle-orm";
 
-// DB 선택
-// 단지 어댑터일 뿐이며 MySQL, PostgreSQL 등 각 DB는 어댑터 설정이 다름
-const sqlite = new Database("movies.db");
+const sqlite = new Database("users.db");
 
-// 어댑터 선택
-// drizzle을 입력하면 여러 가지 어댑터가 있는 것을 확인할 수 있으며, 이 중 내가 사용할 어댑터를 선택해주기만 하면 됨
-const db = drizzle(sqlite);
+// logger: true 옵션을 주면 백그라운드에서 무슨 일이 벌어지고 있는지 로그를 보여줌
+const db = drizzle(sqlite, { logger: true });
 
-// from()의 인자로 데이터베이스의 스키마를 넘겨줘야 함
-const results = await db
-  .select({
-    id: movies.movieId,
-    // movies 데이터베이스의 title 컬럼을 가져옴
-    title: movies.title,
-    overview: movies.overview,
-  })
-  .from(movies)
-  .limit(50);
+// TypeScript의 자동완성 기능을 이용해 편리하게 쿼리를 완성할 수 있음
+// returning은 쿼리 결과를 받아볼 수 있게 해줌
+// const result = await db.insert(users).values({ username: "nico" }).returning();
 
-console.log(results);
+// const result = await db
+//   .insert(comments)
+//   .values({ payload: "hello drizzle", userId: 1 })
+//   .returning();
+
+// SQL Injection 문제로부터 자유로움. 해킹 방지!
+// const result = await db.select().from(comments).where(eq(comments.userId, 1));
+
+// sqlite 경우에는 leftjoin과 rightjoin밖에 없지만 다른 데이터베이스에서 지원하는 join도 자동완성에 보여주기는 함
+const result = await db
+  .select({ user: users.username, comment: comments.payload })
+  .from(comments)
+  .leftJoin(users, eq(comments.userId, users.userId));
+
+console.log(result);
