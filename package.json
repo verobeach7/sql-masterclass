@@ -13,6 +13,7 @@
   "dependencies": {
     "better-sqlite3": "^11.8.1",
     "drizzle-orm": "^0.40.0",
+    "mongoose": "^8.12.1",
     "redis": "^4.7.0"
   }
 }
